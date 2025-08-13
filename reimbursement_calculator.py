@@ -53,3 +53,34 @@ def middle_days(start_date: date, end_date: date):
     
     for day in range(1, get_project_duration(start_date_cleaned, end_date_cleaned) - 1):
         yield start_date_cleaned + timedelta(days=day)
+
+
+def combine_projects(projects):
+    """Combine multiple projects into a single project with a start and end date. if overlapping or contiguous projects in a set.
+    Inputs: projects - a list of tuples containing the following (city_cost_tier, start_date, end_date)
+    """
+    if len(projects) == 0: #no projects provided
+        return []
+    if len(projects) == 1: #only one project provided
+        return [(projects[0][1], projects[0][2])]
+    
+    elif len(projects) > 1: #if more than one project provided
+    #extract the start and end dates from each project and sort by start date
+        sorted_projects_dates = sorted([(p[1],p[2]) for p in projects])
+        merged_project_dates = []
+
+        curr_start_date = sorted_projects_dates[0][0]
+        curr_end_date = sorted_projects_dates[0][1]
+
+        for start, end in sorted_projects_dates[1:]: #iterate through remaining sorted projects
+            #projects overlap or are contiguous
+            if start <= curr_end_date or start <= curr_end_date + timedelta(days=1):
+                curr_end_date = max(curr_end_date, end)
+            #projects have no overlap or contiguity
+            else:
+                merged_project_dates.append((curr_start_date, curr_end_date))
+                curr_start_date = start
+                curr_end_date = end
+    
+        merged_project_dates.append((curr_start_date, curr_end_date))
+        return merged_project_dates
