@@ -57,7 +57,7 @@ def middle_days(start_date: date, end_date: date):
 
 def combine_projects(projects):
     """Combine multiple projects into a single project with a start and end date. if overlapping or contiguous projects in a set.
-    Inputs: projects - a list of tuples containing the following (city_cost_tier, start_date, end_date)
+    Input: projects - a list of tuples containing the following (city_cost_tier, start_date, end_date)
     """
     if len(projects) == 0: #no projects provided
         return []
@@ -84,3 +84,27 @@ def combine_projects(projects):
     
         merged_project_dates.append((curr_start_date, curr_end_date))
         return merged_project_dates
+    
+
+def assign_type_of_day(project_dates):
+    """Assign a type of day (full or travel) to combined project dates. Travel days are edge days and full days are interior days
+    Input: project_dates - a list of project date pairs/ tuples (start_date, end_date)
+    """
+    type_of_day = {}
+    
+    for start_date, end_date in project_dates:
+        #Handle datetimes
+        if isinstance(start_date, datetime):
+            start_date = start_date.date()
+        if isinstance(end_date, datetime):
+            end_date = end_date.date()
+
+        if start_date == end_date: #one day travel
+            type_of_day[start_date] = 'travel'
+        else:
+            type_of_day[start_date] = 'travel' #edge days
+            type_of_day[end_date] = 'travel'
+            for day in middle_days(start_date, end_date): #middle days
+                type_of_day[day] = 'full'
+    
+    return type_of_day
