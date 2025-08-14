@@ -8,17 +8,17 @@ reimbursement_rates = {
 }
 
 
-def get_reimbursement_rate(city_cost: str, day_type: str):
+def get_reimbursement_rate(city_cost: str, type_of_day: str):
     """Get the reimbursement rate based on city cost and day type."""
     city_cost_cleaned = str(city_cost).lower().strip()
-    day_type_cleaned = str(day_type).lower().strip()
+    type_of_day_cleaned = str(type_of_day).lower().strip()
 
     if city_cost_cleaned not in reimbursement_rates:
         raise ValueError(f"Invalid city cost tier: {city_cost}. Valid options are: {list(reimbursement_rates)}")
-    if day_type_cleaned not in reimbursement_rates[city_cost_cleaned]:
-        raise ValueError(f"Invalid day type: {day_type}. Valid options are: {list(reimbursement_rates[city_cost_cleaned])}")
+    if type_of_day_cleaned not in reimbursement_rates[city_cost_cleaned]:
+        raise ValueError(f"Invalid day type: {type_of_day}. Valid options are: {list(reimbursement_rates[city_cost_cleaned])}")
     
-    return reimbursement_rates[city_cost_cleaned][day_type_cleaned]
+    return reimbursement_rates[city_cost_cleaned][type_of_day_cleaned]
 
 
 def get_project_duration(start_date: date | datetime, end_date: date | datetime):
@@ -131,4 +131,34 @@ def choose_cost_tier_per_day(projects):
     return city_cost_tier_for_day
 
 
-            
+def calculate_reimbursement(projects):
+    """Calculate the total reimbursement amount for a set of projects and the daily breakdown of the amount.
+       Input: projects - a list of tuples containing the following (city_cost_tier, start_date, end_date)
+    """
+    if not projects:
+        return 0, {}
+
+    #Apply project combiner for overlapping or contiguous projects
+    project_dates = combine_projects(projects)
+
+    #Assign type of day to each date in the conoslidated project duration (travel or full)
+    types_of_days = assign_type_of_day(project_dates)
+
+    #Assign city cost tier to each date in the project duration (low or high)
+    city_cost_tiers = choose_cost_tier_per_day(projects)
+
+    #Calculate total reimbursement and daily breakdown
+    total_reimbursement = 0
+    reimbursement_breakdown = {}
+
+    days = city_cost_tiers.keys() & types_of_days.keys()  # Get intersection of days to capture days with both cost tier and type of day
+    for day in sorted(days):
+        cost_tier = city_cost_tiers[day]
+
+        day_type = types_of_days[day]
+
+        reimbursement_rate = get_reimbursement_rate(cost_tier, day_type)
+
+        reimbursement_breakdown[day] = (cost_tier, day_type, reimbursement_rate)
+        total_reimbursement += reimbursement_rate
+    return total_reimbursement, reimbursement_breakdown
