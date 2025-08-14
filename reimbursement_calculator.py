@@ -108,3 +108,27 @@ def assign_type_of_day(project_dates):
                 type_of_day[day] = 'full'
     
     return type_of_day
+
+
+def choose_cost_tier_per_day(projects):
+    """Assign city cost tier to each date in a project duration. Possible cost tiers are 'low' and 'high'. If a date is covered by multiple projects, the highest cost tier is assigned.
+    Input: projects - a list of tuples containing the following (city_cost_tier, start_date, end_date) """
+
+    city_cost_tier_for_day = {}
+
+    for cost_tier, start, end in projects:
+        cost_tier_cleaned = str(cost_tier).lower().strip()
+        #validate provided cost tier (cleaned)
+        if cost_tier_cleaned not in reimbursement_rates:
+            raise ValueError(f"Invalid city cost tier: {cost_tier}. Valid options are: {list(reimbursement_rates)}")
+        
+        for day in each_day(start,end):
+            if cost_tier_cleaned == 'high':
+                city_cost_tier_for_day[day] = 'high' #override with high cost tier if already set, or populate with high tier
+            elif day not in city_cost_tier_for_day:
+                city_cost_tier_for_day[day] = "low" #otherwise, low
+    
+    return city_cost_tier_for_day
+
+
+            
