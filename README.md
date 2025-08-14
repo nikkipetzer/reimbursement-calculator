@@ -44,8 +44,15 @@ Python tool to compute travel reimbursement for sets of projects; handles overla
 - requirements.txt: pytest (for unit tests)
 
 
+
 ## How to run
-### Run all Scenarios
+### Quick Start: Run all 4 Scenarios
+
+**Prereqs**
+- Python 3.10+ and `pip`
+- Install test deps: `pip install -r requirements.txt`
+
+**Run all scenarios:**
 `python run_scenarios.py`
 
 ### Custom Calculations
